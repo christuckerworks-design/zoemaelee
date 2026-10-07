@@ -1,0 +1,15 @@
+# Zoemaelee — Netlify configuration
+#
+# Static site: no build step. The repo root IS the published folder.
+
+[build]
+  publish = "."
+
+# --- Security headers (safe defaults, no CSP so Supabase keeps working) ---
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "SAMEORIGIN"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"

@@ -1,0 +1,735 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zoemaelee — Share your list. Keep your identity.</title>
+<style>
+  :root{
+    --bg:#0E0A14; --surface:#1A1424; --surface2:#241B32; --line:#342A47;
+    --text:#F5F1FA; --muted:#9C93AD; --accent:#F5B841; --accent2:#C77DFF;
+    --good:#4ADE80; --danger:#FF6B8A; --gold:#FFD166;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{background:radial-gradient(1200px 800px at 25% 0%, #221636 0%, #0E0A14 55%, #080510 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;padding:32px 16px;color:var(--text);}
+  .stage{display:flex;flex-direction:column;align-items:center;gap:16px;}
+  .brandnote{color:var(--muted);font-size:12px;letter-spacing:.08em;text-transform:uppercase;}
+  .phone{width:390px;height:844px;border-radius:48px;background:var(--bg);border:1px solid #3A2E52;position:relative;overflow:hidden;box-shadow:0 50px 100px rgba(0,0,0,.7),0 0 0 8px #120C1C,inset 0 0 0 1px rgba(255,255,255,.03);display:flex;flex-direction:column;}
+  .notch{position:absolute;top:12px;left:50%;transform:translateX(-50%);width:120px;height:26px;background:#000;border-radius:20px;z-index:60;}
+  .statusbar{height:52px;flex:0 0 52px;display:flex;align-items:flex-end;justify-content:space-between;padding:0 26px 6px;font-size:13px;font-weight:600;z-index:55;}
+  .statusbar .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);display:inline-block;}
+  .screens{position:relative;flex:1;overflow:hidden;}
+  .screen{position:absolute;inset:0;padding:8px 22px 20px;overflow-y:auto;opacity:0;visibility:hidden;transform:translateY(8px);transition:opacity .28s,transform .28s,visibility .28s;}
+  .screen.active{opacity:1;visibility:visible;transform:none;}
+  .screen::-webkit-scrollbar{width:0;}
+  h1{font-size:29px;line-height:1.12;margin:8px 0 10px;letter-spacing:-.02em;}
+  h2{font-size:21px;margin:4px 0 8px;letter-spacing:-.01em;}
+  h3{font-size:15px;margin:0 0 6px;}
+  p{color:var(--muted);font-size:14.5px;line-height:1.55;margin:0 0 14px;}
+  .brand{display:flex;align-items:center;gap:10px;margin-top:6px;}
+  .mark{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:800;color:#1A0E00;font-size:18px;}
+  .brand .name{font-weight:800;letter-spacing:-.02em;font-size:18px;}
+  .hero{margin-top:20px;border-radius:24px;padding:22px 20px;background:linear-gradient(150deg,rgba(199,125,255,.22),rgba(245,184,65,.14) 60%,transparent);border:1px solid rgba(199,125,255,.3);}
+  .hero h1{margin-bottom:8px;} .hero p{margin-bottom:0;color:#D6CEE6;}
+  .feat{display:flex;gap:12px;align-items:flex-start;margin:15px 0;}
+  .feat .ic{flex:0 0 34px;height:34px;border-radius:10px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:16px;border:1px solid var(--line);}
+  .feat .tx b{display:block;font-size:14.5px;margin-bottom:2px;}
+  .feat .tx span{font-size:13px;color:var(--muted);line-height:1.45;}
+  .btn{width:100%;border:none;border-radius:16px;padding:16px;font-size:15.5px;font-weight:700;background:linear-gradient(135deg,var(--accent),#E0A32C);color:#1A0E00;cursor:pointer;transition:transform .12s;font-family:inherit;}
+  .btn:active{transform:scale(.98);}
+  .btn.ghost{background:var(--surface2);color:var(--text);border:1px solid var(--line);}
+  .btn.orchid{background:linear-gradient(135deg,var(--accent2),#9B4FD6);color:#fff;}
+  .btn.small{padding:11px;font-size:13.5px;border-radius:13px;}
+  .btn.danger{background:rgba(255,107,138,.14);color:var(--danger);border:1px solid rgba(255,107,138,.35);}
+  .stack{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
+  .field{margin:14px 0;}
+  .field label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px;font-weight:600;letter-spacing:.03em;}
+  .inputwrap{display:flex;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:0 14px;}
+  .inputwrap .pre{color:var(--muted);font-size:16px;font-weight:700;padding-right:2px;}
+  .inputwrap input{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-size:15px;font-weight:500;padding:14px 0;font-family:inherit;width:100%;}
+  .hint{font-size:12px;color:var(--muted);margin-top:7px;line-height:1.45;}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:18px;margin-top:14px;}
+  .topbar{display:flex;align-items:center;gap:12px;margin:6px 0 4px;}
+  .back{background:var(--surface2);border:1px solid var(--line);border-radius:12px;width:40px;height:40px;color:var(--text);font-size:18px;cursor:pointer;font-family:inherit;}
+  .topbar h2{margin:0;font-size:18px;flex:1;}
+  .sec-title{display:flex;justify-content:space-between;align-items:center;margin:22px 0 10px;}
+  .sec-title h3{margin:0;font-size:13px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;}
+  .pill{font-size:10.5px;background:rgba(245,184,65,.14);color:var(--accent);padding:4px 9px;border-radius:20px;font-weight:700;letter-spacing:.04em;}
+  .pill.orchid{background:rgba(199,125,255,.16);color:var(--accent2);}
+  .pill.good{background:rgba(74,222,128,.14);color:var(--good);}
+  .item{display:flex;gap:13px;align-items:center;padding:13px 0;border-bottom:1px solid var(--line);}
+  .item:last-child{border-bottom:none;}
+  .thumb{width:54px;height:54px;border-radius:13px;flex:0 0 54px;background:var(--surface2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:22px;}
+  .item .mid{flex:1;min-width:0;}
+  .item .mid b{display:block;font-size:14px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .item .mid span{font-size:12px;color:var(--muted);}
+  .item .price{font-size:14px;font-weight:700;color:var(--accent);}
+  .tabbar{flex:0 0 76px;display:flex;align-items:center;justify-content:space-around;border-top:1px solid var(--line);background:rgba(26,20,36,.94);backdrop-filter:blur(12px);padding-bottom:8px;}
+  .tabbar.hidden{display:none;}
+  .tab{background:none;border:none;color:var(--muted);font-size:10.5px;font-weight:600;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;font-family:inherit;padding:6px 8px;}
+  .tab .ic{font-size:19px;} .tab.on{color:var(--accent);}
+  .qrwrap{background:#fff;border-radius:22px;padding:16px;margin:16px auto 0;width:236px;}
+  .qr{display:grid;width:204px;height:204px;} .qr i{display:block;}
+  .linkbox{background:var(--surface2);border:1px dashed var(--line);border-radius:14px;padding:14px;font-size:13px;color:var(--accent);word-break:break-all;text-align:center;margin-top:14px;font-weight:600;}
+  .toggle{display:flex;justify-content:space-between;align-items:center;padding:15px 0;border-bottom:1px solid var(--line);}
+  .toggle:last-child{border-bottom:none;}
+  .toggle .lbl b{display:block;font-size:14px;margin-bottom:2px;}
+  .toggle .lbl span{font-size:12px;color:var(--muted);}
+  .sw{width:46px;height:27px;border-radius:20px;background:var(--surface2);border:1px solid var(--line);position:relative;cursor:pointer;flex:0 0 46px;transition:background .2s;}
+  .sw::after{content:'';position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;background:#6b5f82;transition:.2s;}
+  .sw.on{background:rgba(245,184,65,.28);border-color:rgba(245,184,65,.45);}
+  .sw.on::after{left:21px;background:var(--accent);}
+  .modal{position:absolute;inset:0;background:rgba(8,5,16,.75);backdrop-filter:blur(6px);display:none;align-items:flex-end;z-index:70;}
+  .modal.show{display:flex;}
+  .sheet{width:100%;background:var(--surface);border-radius:26px 26px 0 0;padding:26px 22px 30px;border-top:1px solid var(--line);max-height:88%;overflow-y:auto;}
+  .sheet .grab{width:40px;height:4px;border-radius:4px;background:var(--line);margin:0 auto 18px;}
+  .banner{background:rgba(245,184,65,.1);border:1px solid rgba(245,184,65,.3);color:#F7DCA0;border-radius:12px;padding:11px 13px;font-size:12px;line-height:1.5;margin-top:12px;}
+  .banner.orchid{background:rgba(199,125,255,.1);border-color:rgba(199,125,255,.3);color:#E3C8FF;}
+  .banner.good{background:rgba(74,222,128,.1);border-color:rgba(74,222,128,.3);color:#A7F3C6;}
+  .bigcheck{width:74px;height:74px;border-radius:50%;background:rgba(74,222,128,.14);border:1px solid rgba(74,222,128,.4);display:flex;align-items:center;justify-content:center;font-size:34px;margin:20px auto 14px;}
+  .center{text-align:center;}
+  .av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:#1A0E00;flex:0 0 40px;}
+  .handle{display:flex;align-items:center;gap:10px;} .handle .hh{font-weight:800;font-size:16px;}
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.03em;}
+  .badge.self{background:rgba(245,184,65,.14);color:var(--accent);border:1px solid rgba(245,184,65,.3);}
+  .badge.verified{background:linear-gradient(135deg,rgba(74,222,128,.2),rgba(245,184,65,.18));color:var(--good);border:1px solid rgba(74,222,128,.45);}
+  .badge.ally{background:rgba(199,125,255,.16);color:var(--accent2);border:1px solid rgba(199,125,255,.35);}
+  .impact{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px;}
+  .impact div{background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:14px 6px;text-align:center;}
+  .impact b{display:block;font-size:22px;font-weight:800;color:var(--accent);}
+  .impact span{font-size:10.5px;color:var(--muted);}
+  .fund{background:linear-gradient(150deg,rgba(74,222,128,.14),rgba(245,184,65,.1));border:1px solid rgba(74,222,128,.3);border-radius:20px;padding:18px;margin-top:14px;}
+  .fund .big{font-size:30px;font-weight:800;color:var(--good);letter-spacing:-.02em;}
+  .lbrow{display:flex;align-items:center;gap:12px;padding:13px 0;border-bottom:1px solid var(--line);}
+  .lbrow:last-child{border-bottom:none;}
+  .rank{width:26px;text-align:center;font-weight:800;font-size:14px;color:var(--muted);flex:0 0 26px;}
+  .rank.top{color:var(--gold);}
+  .lbrow .mid{flex:1;min-width:0;}
+  .lbrow .mid b{display:block;font-size:14px;margin-bottom:2px;}
+  .lbrow .mid span{font-size:11.5px;color:var(--muted);}
+  .lbrow .score{font-size:14px;font-weight:800;color:var(--accent2);}
+  .avstrip{display:flex;align-items:center;margin-top:12px;justify-content:center;}
+  .avstrip .av{width:30px;height:30px;font-size:12px;flex:0 0 30px;border:2px solid var(--bg);margin-left:-8px;}
+  .avstrip .av:first-child{margin-left:0;}
+  .avstrip .more{width:30px;height:30px;border-radius:50%;background:var(--surface2);border:2px solid var(--bg);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:var(--muted);margin-left:-8px;}
+  .tier{display:flex;gap:12px;align-items:flex-start;padding:14px 0;border-bottom:1px solid var(--line);}
+  .tier:last-child{border-bottom:none;}
+  .tier .tn{flex:0 0 34px;height:34px;border-radius:10px;background:var(--surface2);border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:16px;}
+  .tier .tt b{display:block;font-size:14px;margin-bottom:3px;}
+  .tier .tt span{font-size:12.5px;color:var(--muted);line-height:1.45;}
+  .tiny{font-size:11.5px;color:var(--muted);text-align:center;line-height:1.5;margin-top:12px;}
+  .authmsg{font-size:12.5px;line-height:1.5;margin:10px 0 0;min-height:16px;}
+  .authmsg.err{color:var(--danger);}
+  .authmsg.ok{color:var(--good);}
+  .linkrow{text-align:center;margin-top:16px;font-size:13px;color:var(--muted);}
+  .linkrow a{color:var(--accent2);text-decoration:none;font-weight:700;cursor:pointer;}
+  .consent{display:flex;gap:10px;align-items:flex-start;margin:16px 0 0;font-size:12px;color:var(--muted);line-height:1.5;cursor:pointer;}
+  .consent input{margin:2px 0 0;flex:0 0 auto;width:16px;height:16px;accent-color:#C77DFF;}
+  .consent a{color:var(--accent2);font-weight:600;cursor:pointer;}
+  .bpinput{width:100%;box-sizing:border-box;border:1px solid #e2e2e6;border-radius:9px;padding:9px 11px;font-size:14px;font-family:inherit;margin:0 0 8px;background:#fafafa;color:#111;}
+  .bpinput.small{font-size:13px;}
+  .itemrow{cursor:pointer;}
+  .itemrow:active{opacity:.6;}
+  .drow{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:14px;}
+  .drow:last-of-type{border-bottom:none;}
+  .drow span{color:var(--muted);}
+  .drow b{text-align:right;word-break:break-all;}
+  .prodpreview{background:#fff;border-radius:14px;padding:16px;color:#111;margin:12px 0;}
+  .prodpreview .ph{height:90px;border-radius:10px;background:linear-gradient(135deg,#ddd,#bbb);display:flex;align-items:center;justify-content:center;font-size:34px;margin-bottom:10px;}
+  .prodpreview b{font-size:14px;display:block;} .prodpreview span{font-size:13px;color:#666;}
+  .prodpreview .p{font-size:18px;font-weight:800;margin-top:6px;color:#111;}
+  .bmlet{background:#0B0812;border:1px dashed var(--accent2);border-radius:12px;padding:12px 14px;font-size:12.5px;color:var(--accent2);text-align:center;font-weight:700;margin:10px 0;cursor:grab;}
+
+  /* CIRCLES */
+  .seg{display:flex;background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:4px;margin-top:14px;}
+  .seg button{flex:1;background:none;border:none;color:var(--muted);font-size:13.5px;font-weight:700;padding:10px;border-radius:11px;cursor:pointer;font-family:inherit;transition:.2s;}
+  .seg button.on{background:var(--surface);color:var(--text);}
+  .circlemark{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;flex:0 0 44px;background:var(--surface2);border:1px solid var(--line);}
+  .progress{height:12px;background:var(--surface2);border-radius:10px;overflow:hidden;margin-top:10px;border:1px solid var(--line);}
+  .progress i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:10px;}
+  .goalhead{display:flex;justify-content:space-between;align-items:baseline;}
+  .memberrow{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--line);}
+  .memberrow:last-child{border-bottom:none;}
+  .memberrow .mid{flex:1;min-width:0;}
+  .memberrow .mid b{font-size:13.5px;display:block;}
+  .memberrow .mid span{font-size:11.5px;color:var(--muted);}
+  .memberrow .contrib{font-size:13px;font-weight:700;color:var(--accent2);}
+  .typetag{font-size:10.5px;background:var(--surface2);border:1px solid var(--line);color:var(--muted);padding:4px 10px;border-radius:20px;font-weight:700;letter-spacing:.03em;cursor:pointer;}
+  .typetag.on{border-color:var(--accent);color:var(--accent);background:rgba(245,184,65,.1);}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="phone">
+    <div class="notch"></div>
+    <div class="statusbar"><span>9:41</span><span><span class="dot"></span> ●●●</span></div>
+
+    <div class="screens" id="screens">
+
+      <!-- WELCOME -->
+      <div class="screen active" id="s-welcome" data-tab="0">
+        <div class="brand"><div class="mark">Z</div><div class="name">Zoemaelee</div></div>
+        <div class="hero">
+          <h1>Share your list. Keep your identity.</h1>
+          <p>A wishlist you can share with anyone — without handing over your real name or address. Let your people show up for you.</p>
+        </div>
+        <div class="feat"><div class="ic">🎭</div><div class="tx"><b>Pseudonymous by design</b><span>Share under a handle. No real name, no address, ever stored.</span></div></div>
+        <div class="feat"><div class="ic">🎁</div><div class="tx"><b>Gifts from any store</b><span>Add items with one click. Your gifter buys; the store ships.</span></div></div>
+        <div class="feat"><div class="ic">🛡️</div><div class="tx"><b>Visible allyship</b><span>Supporters stand with creators — publicly. 10% of affiliate revenue goes back to the community.</span></div></div>
+        <div class="feat"><div class="ic">🔥</div><div class="tx"><b>Ally circles</b><span>Gather your team, company, or friend group. Compete together and hit a shared goal.</span></div></div>
+        <div class="stack">
+          <button class="btn" onclick="go('s-create')">Create your list</button>
+          <button class="btn ghost" onclick="go('s-public')">I'm here to support someone</button>
+        </div>
+        <div class="linkrow">Already have an account? <a onclick="go('s-login')">Log in</a></div>
+        <p class="tiny">Free. No payment handled. No address ever shared. Your email stays private — only your handle is public.</p>
+      </div>
+
+      <!-- CREATE / SIGN UP -->
+      <div class="screen" id="s-create" data-tab="0">
+        <div class="topbar"><button class="back" onclick="go('s-welcome')">←</button><h2>Create your list</h2></div>
+        <p>Pick a handle — the only thing anyone else will ever see.</p>
+        <div class="field"><label>YOUR HANDLE</label><div class="inputwrap"><span class="pre">@</span><input id="handleInput" placeholder="thegoldenone" oninput="setHandle()" autocomplete="off"></div><div class="hint">Never has to be your real name. Nobody can search for it.</div></div>
+        <div class="field"><label>EMAIL</label><div class="inputwrap"><input id="suEmail" type="email" placeholder="you@email.com" autocomplete="email"></div><div class="hint">Stays private — never shown on your list.</div></div>
+        <div class="field"><label>PASSWORD</label><div class="inputwrap"><input id="suPass" type="password" placeholder="At least 8 characters" autocomplete="new-password"></div></div>
+        <div class="field"><label>LIST TITLE</label><div class="inputwrap"><input id="suTitle" placeholder="My wishlist"></div></div>
+        <div class="card">
+          <div class="toggle"><div class="lbl"><b>Black-owned badge</b><span>Self-identify now. Get verified later for the ✓ badge.</span></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="toggle"><div class="lbl"><b>Accept ally support</b><span>Let supporters gift, amplify, and track their impact.</span></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+        <label class="consent"><input type="checkbox" id="suConsent"><span>I agree to the <a onclick="showModal('m-privacy')">Privacy Policy</a>. I understand my email is stored to run my account and is never shown publicly.</span></label>
+        <div class="stack"><button class="btn" id="suBtn" onclick="createAccount()">Create list</button></div>
+        <div id="suMsg" class="authmsg"></div>
+        <div class="linkrow">Already have an account? <a onclick="go('s-login')">Log in</a></div>
+      </div>
+
+      <!-- LOG IN -->
+      <div class="screen" id="s-login" data-tab="0">
+        <div class="topbar"><button class="back" onclick="go('s-welcome')">←</button><h2>Log in</h2></div>
+        <p>Welcome back. Your handle is the only thing anyone else ever sees.</p>
+        <div class="field"><label>EMAIL</label><div class="inputwrap"><input id="liEmail" type="email" placeholder="you@email.com" autocomplete="email"></div></div>
+        <div class="field"><label>PASSWORD</label><div class="inputwrap"><input id="liPass" type="password" placeholder="Your password" autocomplete="current-password"></div></div>
+        <div class="stack"><button class="btn" id="liBtn" onclick="logIn()">Log in</button></div>
+        <div id="liMsg" class="authmsg"></div>
+        <div class="linkrow">New here? <a onclick="go('s-create')">Create your list</a></div>
+      </div>
+
+      <!-- DASHBOARD -->
+      <div class="screen" id="s-dashboard" data-tab="1">
+        <div class="topbar">
+          <div class="av" id="dashAv" style="background:linear-gradient(135deg,#F5B841,#C77DFF)">T</div>
+          <div class="handle" style="flex:1"><span class="hh" id="dashHandle">@thegoldenone</span></div>
+          <span class="badge self">★ Black-owned</span>
+        </div>
+        <p style="margin-top:2px;">Your list · shared privately by link</p>
+        <div class="card" style="background:linear-gradient(150deg,rgba(245,184,65,.1),rgba(199,125,255,.08));">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div><b style="font-size:14px;">Ally impact</b><div style="font-size:12px;color:var(--muted);margin-top:2px;">People supporting your list</div></div>
+            <span class="pill">NEW</span>
+          </div>
+          <div class="impact"><div><b>0</b><span>Allies</span></div><div><b>0</b><span>Gifts</span></div><div><b>0</b><span>Amplifies</span></div></div>
+        </div>
+        <div class="card" style="border-color:rgba(74,222,128,.35);">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <div><b style="font-size:14px;">Get verified ✓</b><div style="font-size:12px;color:var(--muted);margin-top:2px;">Upgrade to a verified Black-owned badge</div></div>
+            <span class="pill good">OPTIONAL</span>
+          </div>
+          <button class="btn ghost small" style="margin-top:12px;" onclick="go('s-verify')">See verification options</button>
+        </div>
+        <div class="sec-title"><h3>Your list</h3><span class="pill good">LIVE</span></div>
+        <div class="card" id="dashItems" style="padding:6px 18px;"></div>
+        <div class="stack">
+          <button class="btn" onclick="go('s-additem')">＋ Add an item</button>
+          <button class="btn ghost" onclick="go('s-share')">Share my list</button>
+        </div>
+      </div>
+
+      <!-- ADD ITEM -->
+      <div class="screen" id="s-additem" data-tab="0">
+        <div class="topbar"><button class="back" onclick="go('s-dashboard')">←</button><h2>Add an item</h2></div>
+        <p>Three ways to capture a product. Manual always works — the bookmarklet is the fast one.</p>
+        <div class="card">
+          <div class="sec-title" style="margin-top:0;"><h3>1 · Paste a link</h3><span class="pill good">AUTO</span></div>
+          <div class="inputwrap"><input placeholder="https://store.com/product"><span style="color:var(--muted);font-size:13px;">auto-fetch</span></div>
+          <div class="hint">Works on stores that allow it. Amazon isn't one of them — use the bookmarklet below.</div>
+        </div>
+        <div class="card">
+          <div class="sec-title" style="margin-top:0;"><h3>2 · Bookmarklet</h3><span class="pill orchid">FASTEST</span></div>
+          <p style="font-size:13px;">Drag this to your bookmarks bar once. Then click it on any product page.</p>
+          <div class="bmlet" onclick="showModal('m-bookmarklet')">🎁 Add to Zoemaelee</div>
+          <div class="hint">Works on Amazon and any store. User-initiated — you choose what to capture.</div>
+        </div>
+        <div class="card">
+          <div class="sec-title" style="margin-top:0;"><h3>3 · Manual entry</h3><span class="pill">ALWAYS WORKS</span></div>
+          <div class="stack" style="margin-top:4px;"><button class="btn ghost small" onclick="showModal('m-manual')">Enter details by hand</button></div>
+        </div>
+        <div class="banner orchid">🔒 We never crawl Amazon. Captures are user-initiated, so your account stays safe and affiliate access stays intact.</div>
+      </div>
+
+      <!-- PUBLIC LIST -->
+      <div class="screen" id="s-public" data-tab="0">
+        <div class="topbar"><button class="back" onclick="go('s-welcome')">←</button><h2>Someone's list</h2></div>
+        <div class="card" style="text-align:center;background:linear-gradient(150deg,rgba(199,125,255,.12),rgba(245,184,65,.08));">
+          <div class="av" style="width:64px;height:64px;font-size:24px;margin:6px auto 12px;background:linear-gradient(135deg,#F5B841,#C77DFF);">T</div>
+          <div style="font-weight:800;font-size:20px;">@thegoldenone</div>
+          <div style="margin-top:8px;"><span class="badge verified">✓ Verified Black-owned</span></div>
+          <p style="margin:12px 0 0;font-size:13px;">"Supporting my creative work 🎨"</p>
+          <div class="avstrip">
+            <div class="av" style="background:linear-gradient(135deg,#C77DFF,#F5B841);">M</div>
+            <div class="av" style="background:linear-gradient(135deg,#F5B841,#FF6B8A);">D</div>
+            <div class="av" style="background:linear-gradient(135deg,#4ADE80,#C77DFF);">J</div>
+            <div class="av" style="background:linear-gradient(135deg,#FF6B8A,#C77DFF);">A</div>
+            <div class="more">+8</div>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-top:8px;">Supported by <b style="color:var(--accent2)">12 allies</b> · 3 circles</div>
+          <div class="banner orchid" style="text-align:left;">🔒 You see a handle and nothing else. No real name, no address, no personal info — by design.</div>
+        </div>
+        <div class="sec-title"><h3>Wishlist</h3><span class="pill">3 ITEMS</span></div>
+        <div class="card" style="padding:6px 18px;">
+          <div class="item"><div class="thumb">🎧</div><div class="mid"><b>Studio headphones</b><span>Tap to gift</span></div><button class="btn small" style="width:auto;padding:8px 14px;" onclick="showModal('m-reserve')">Gift</button></div>
+          <div class="item"><div class="thumb">📚</div><div class="mid"><b>The Warmth of Other Suns</b><span>Tap to gift</span></div><button class="btn small" style="width:auto;padding:8px 14px;" onclick="showModal('m-reserve')">Gift</button></div>
+          <div class="item"><div class="thumb">🕯️</div><div class="mid"><b>Shea butter candle set</b><span>Reserved by an ally ✓</span></div><span class="pill good">RESERVED</span></div>
+        </div>
+        <div class="banner good">🌱 10% of the affiliate revenue from your gifts goes to the Zoemaelee Community Fund.</div>
+        <div class="stack"><button class="btn orchid" onclick="go('s-ally')">🤝 I'm an ally — support this creator</button></div>
+      </div>
+
+      <!-- ALLY HUB -->
+      <div class="screen" id="s-ally" data-tab="3">
+        <div class="topbar"><button class="back" onclick="go('s-public')">←</button><h2>Ally hub</h2></div>
+        <div class="card" style="background:linear-gradient(150deg,rgba(199,125,255,.18),rgba(245,184,65,.1));text-align:center;">
+          <div style="font-size:34px;">🤝</div>
+          <div style="font-weight:800;font-size:19px;margin:8px 0 4px;">Stand with creators</div>
+          <p style="margin:0;font-size:13.5px;">Not out of guilt — out of love. Support Black creators, amplify their work, and watch your impact add up.</p>
+        </div>
+        <div class="sec-title"><h3>Your impact</h3><span class="pill orchid">ALLY</span></div>
+        <div class="impact"><div><b>3</b><span>Creators lifted</span></div><div><b>5</b><span>Gifts sent</span></div><div><b>8</b><span>Amplifies</span></div></div>
+
+        <!-- YOUR CIRCLE -->
+        <div class="sec-title"><h3>Your circle</h3><span class="pill orchid">RANK #1</span></div>
+        <div class="card" style="background:linear-gradient(150deg,rgba(199,125,255,.12),rgba(245,184,65,.08));">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="circlemark">🔥</div>
+            <div style="flex:1;"><b style="font-size:15px;">The Cookout</b><div style="font-size:12px;color:var(--muted);margin-top:2px;">24 members · friend group</div></div>
+            <div class="score" style="font-size:15px;font-weight:800;color:var(--accent2);">8,420</div>
+          </div>
+          <div class="goalhead" style="margin-top:14px;"><b style="font-size:13px;">🎯 Lift 100 creators this month</b><span style="font-size:12px;color:var(--accent);font-weight:700;">78%</span></div>
+          <div class="progress"><i style="width:78%"></i></div>
+          <div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:8px;"><span>78 lifted</span><span>Goal: 100</span></div>
+          <button class="btn ghost small" style="margin-top:14px;" onclick="go('s-circle')">View circle</button>
+        </div>
+        <button class="btn ghost small" style="margin-top:10px;" onclick="go('s-createcircle')">＋ Create or join a circle</button>
+
+        <div class="fund">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <b style="font-size:14px;">🌱 Zoemaelee Community Fund</b><span class="pill good">10%</span>
+          </div>
+          <div class="big" style="margin-top:8px;">$4,210</div>
+          <div style="font-size:12px;color:var(--muted);">10% of all affiliate revenue, given back. Distributed monthly to Black-led nonprofits.</div>
+          <button class="btn ghost small" style="margin-top:12px;" onclick="showModal('m-fund')">See where it goes</button>
+        </div>
+        <div class="stack"><button class="btn orchid" onclick="go('s-leaderboard')">🏆 View leaderboard</button></div>
+        <div class="sec-title"><h3>Creators to support</h3></div>
+        <div class="card" style="padding:6px 18px;">
+          <div class="item"><div class="av" style="background:linear-gradient(135deg,#C77DFF,#F5B841);">M</div><div class="mid"><b>@madebymaya</b><span>✓ Verified · 8 items</span></div><button class="btn small" style="width:auto;padding:8px 14px;" onclick="go('s-public')">View</button></div>
+          <div class="item"><div class="av" style="background:linear-gradient(135deg,#F5B841,#FF6B8A);">D</div><div class="mid"><b>@deejayk</b><span>★ Self-identified · 12 items</span></div><button class="btn small" style="width:auto;padding:8px 14px;" onclick="go('s-public')">View</button></div>
+        </div>
+        <p class="tiny">Allyship is opt-in. No one is denied service, and no one is shamed for not participating.</p>
+      </div>
+
+      <!-- LEADERBOARD -->
+      <div class="screen" id="s-leaderboard" data-tab="0">
+        <div class="topbar"><button class="back" onclick="go('s-ally')">←</button><h2>Leaderboard</h2></div>
+        <div class="seg">
+          <button class="on" id="segAllies" onclick="lbTab('allies')">Ally</button>
+          <button id="segCircles" onclick="lbTab('circles')">Circles</button>
+        </div>
+
+        <div id="lb-allies">
+          <div class="card" style="background:linear-gradient(150deg,rgba(245,184,65,.14),rgba(199,125,255,.1));">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><b style="font-size:14px;">Your rank</b><div style="font-size:12px;color:var(--muted);margin-top:2px;">Top 15% of allies</div></div>
+              <div style="text-align:right;"><div style="font-size:24px;font-weight:800;color:var(--accent);">#14</div><span class="badge ally">ALLY</span></div>
+            </div>
+          </div>
+          <div class="sec-title"><h3>Top allies this week</h3><span class="pill orchid">RESETS MON</span></div>
+          <div class="card" style="padding:6px 18px;">
+            <div class="lbrow"><div class="rank top">1</div><div class="av" style="background:linear-gradient(135deg,#FFD166,#F5B841);">K</div><div class="mid"><b>@kindred_kai</b><span>24 creators lifted</span></div><div class="score">2,410</div></div>
+            <div class="lbrow"><div class="rank top">2</div><div class="av" style="background:linear-gradient(135deg,#C77DFF,#F5B841);">S</div><div class="mid"><b>@sunnyd</b><span>19 creators lifted</span></div><div class="score">1,980</div></div>
+            <div class="lbrow"><div class="rank top">3</div><div class="av" style="background:linear-gradient(135deg,#4ADE80,#C77DFF);">L</div><div class="mid"><b>@lifttogether</b><span>17 creators lifted</span></div><div class="score">1,745</div></div>
+            <div class="lbrow"><div class="rank">4</div><div class="av" style="background:linear-gradient(135deg,#FF6B8A,#C77DFF);">A</div><div class="mid"><b>@anon ally</b><span>Staying anonymous</span></div><div class="score">1,402</div></div>
+            <div class="lbrow"><div class="rank">5</div><div class="av" style="background:linear-gradient(135deg,#F5B841,#FF6B8A);">R</div><div class="mid"><b>@riseup</b><span>13 creators lifted</span></div><div class="score">1,120</div></div>
+          </div>
+          <div class="card">
+            <div class="toggle"><div class="lbl"><b>Show me on the leaderboard</b><span>Opt in to public recognition. Off = fully anonymous.</span></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="toggle"><div class="lbl"><b>Weekly reset</b><span>Everyone starts fresh — no permanent hierarchy.</span></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+          <div class="banner orchid">Impact is weighted toward creators lifted and amplifies — not just dollars. Support, not spending.</div>
+        </div>
+
+        <div id="lb-circles" style="display:none;">
+          <div class="card" style="background:linear-gradient(150deg,rgba(199,125,255,.14),rgba(245,184,65,.1));">
+            <div style="display:flex;justify-content:space-between;align-items:center;">
+              <div><b style="font-size:14px;">Your circle rank</b><div style="font-size:12px;color:var(--muted);margin-top:2px;">The Cookout</div></div>
+              <div style="text-align:right;"><div style="font-size:24px;font-weight:800;color:var(--accent2);">#1</div><span class="badge ally">CIRCLE</span></div>
+            </div>
+          </div>
+          <div class="sec-title"><h3>Top circles this week</h3><span class="pill orchid">RESETS MON</span></div>
+          <div class="card" style="padding:6px 18px;">
+            <div class="lbrow" onclick="go('s-circle')"><div class="rank top">1</div><div class="circlemark">🔥</div><div class="mid"><b>The Cookout</b><span>24 members · friend group</span></div><div class="score">8,420</div></div>
+            <div class="lbrow"><div class="rank top">2</div><div class="circlemark">🏢</div><div class="mid"><b>Studio 54 Team</b><span>48 members · company</span></div><div class="score">7,905</div></div>
+            <div class="lbrow"><div class="rank top">3</div><div class="circlemark">🎓</div><div class="mid"><b>HBCU Alumni</b><span>112 members · community</span></div><div class="score">6,640</div></div>
+            <div class="lbrow"><div class="rank">4</div><div class="circlemark">💜</div><div class="mid"><b>Kinfolk Collective</b><span>31 members · community</span></div><div class="score">5,120</div></div>
+            <div class="lbrow"><div class="rank">5</div><div class="circlemark">🎧</div><div class="mid"><b>Pod Squad</b><span>17 members · friends</span></div><div class="score">4,300</div></div>
+          </div>
+          <div class="card">
+            <div class="toggle"><div class="lbl"><b>Show circle on leaderboard</b><span>Circle captain controls visibility.</span></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+            <div class="toggle"><div class="lbl"><b>Weekly reset</b><span>Fresh start every week — no dynasty problem.</span></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+          </div>
+          <div class="banner orchid">Circles compete on combined impact. A shared goal keeps everyone pulling the same direction.</div>
+        </div>
+      </div>
+
+      <!-- CIRCLE DETAIL -->
+      <div class="screen" id="s-circle" data-tab="0">
+        <div class="topbar"><button class="back" onclick="go('s-leaderboard')">←</button><h2>Circle</h2></div>
+        <div class="card" style="text-align:center;background:linear-gradient(150deg,rgba(199,125,255,.14),rgba(245,184,65,.1));">
+          <div class="circlemark" style="width:64px;height:64px;font-size:28px;margin:0 auto 12px;">🔥</div>
+          <div style="font-weight:800;font-size:22px;">The Cookout</div>
+          <div style="margin-top:8px;"><span class="typetag">FRIEND GROUP</span> <span class="badge ally">RANK #1</span></div>
+          <div style="font-size:12px;color:var(--muted);margin-top:10px;">24 members lifting together</div>
+        </div>
+
+        <div class="card">
+          <div class="goalhead"><b style="font-size:14px;">🎯 Shared goal</b><span class="pill">78%</span></div>
+          <div style="font-size:13px;color:var(--muted);margin-top:4px;">Lift 100 creators this month</div>
+          <div class="progress"><i style="width:78%"></i></div>
+          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:8px;"><span>78 lifted</span><span>Goal: 100</span></div>
+          <div class="banner good" style="margin-top:12px;">🔥 You're 22 creators from the goal. Your circle is #1 this week.</div>
+        </div>
+
+        <div class="sec-title"><h3>Combined impact</h3></div>
+        <div class="impact"><div><b>78</b><span>Creators lifted</span></div><div><b>61</b><span>Gifts</span></div><div><b>204</b><span>Amplifies</span></div></div>
+
+        <div class="sec-title"><h3>Members</h3><span class="pill orchid">24</span></div>
+        <div class="card" style="padding:6px 18px;">
+          <div class="memberrow"><div class="av" style="background:linear-gradient(135deg,#FFD166,#F5B841);">K</div><div class="mid"><b>@kindred_kai</b><span>Captain</span></div><div class="contrib">2,410</div></div>
+          <div class="memberrow"><div class="av" style="background:linear-gradient(135deg,#C77DFF,#F5B841);">S</div><div class="mid"><b>@sunnyd</b><span>Member</span></div><div class="contrib">1,980</div></div>
+          <div class="memberrow"><div class="av" style="background:linear-gradient(135deg,#4ADE80,#C77DFF);">L</div><div class="mid"><b>@lifttogether</b><span>Member</span></div><div class="contrib">1,745</div></div>
+          <div class="memberrow"><div class="av" style="background:linear-gradient(135deg,#F5B841,#FF6B8A);">You</div><div class="mid"><b>@you</b><span>Member · you</span></div><div class="contrib">620</div></div>
+        </div>
+        <div class="stack">
+          <button class="btn orchid" onclick="showModal('m-invite')">Invite people</button>
+          <button class="btn ghost" onclick="showModal('m-goal')">Edit shared goal</button>
+        </div>
+        <p class="tiny">Circles are opt-in. Members choose whether to appear by handle or anonymously.</p>
+      </div>
+
+      <!-- CREATE CIRCLE -->
+      <div class="screen" id="s-createcircle" data-tab="0">
+        <div class="topbar"><button class="back" onclick="go('s-ally')">←</button><h2>Create a circle</h2></div>
+        <p>Gather your team, company, or friend group. Compete together and hit a shared goal.</p>
+        <div class="field"><label>CIRCLE NAME</label><div class="inputwrap"><input placeholder="The Cookout"></div></div>
+        <div class="field">
+          <label>TYPE</label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <span class="typetag on" onclick="pickType(this)">Friends</span>
+            <span class="typetag" onclick="pickType(this)">Team</span>
+            <span class="typetag" onclick="pickType(this)">Company</span>
+            <span class="typetag" onclick="pickType(this)">Community</span>
+          </div>
+        </div>
+        <div class="field"><label>SHARED GOAL</label><div class="inputwrap"><input placeholder="Lift 100 creators this month"></div><div class="hint">A collective target gives everyone one thing to pull toward.</div></div>
+        <div class="card">
+          <div class="toggle"><div class="lbl"><b>Invite by link</b><span>Anyone with the link can join your circle.</span></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="toggle"><div class="lbl"><b>Public circle</b><span>Appear on the circle leaderboard.</span></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+        <div class="stack">
+          <button class="btn" onclick="showModal('m-circlecreated')">Create circle</button>
+          <button class="btn ghost" onclick="go('s-ally')">Join with a code instead</button>
+        </div>
+      </div>
+
+      <!-- VERIFY -->
+      <div class="screen" id="s-verify" data-tab="0">
+        <div class="topbar"><button class="back" onclick="go('s-dashboard')">←</button><h2>Black-owned verification</h2></div>
+        <p>Two tiers. Self-identified is instant. Verified uses a third-party certifier — we never judge who is or isn't Black ourselves.</p>
+        <div class="card">
+          <div class="tier"><div class="tn">★</div><div class="tt"><b>Self-identified <span class="badge self" style="margin-left:4px;">★ Black-owned</span></b><span>You check a box. Instant, free, no documents. Shown as self-identified.</span></div></div>
+          <div class="tier"><div class="tn">✓</div><div class="tt"><b>Verified <span class="badge verified" style="margin-left:4px;">✓ Verified</span></b><span>Confirmed by an independent certifier or business documents. Higher trust, unlocks the ✓ badge.</span></div></div>
+        </div>
+        <div class="sec-title"><h3>How to get verified</h3></div>
+        <div class="card">
+          <div class="tier"><div class="tn">📜</div><div class="tt"><b>ByBlack Certification</b><span>Issued by the U.S. Black Chambers. The standard for Black-owned businesses.</span></div></div>
+          <div class="tier"><div class="tn">🏛️</div><div class="tt"><b>NMSDC / MBE Certification</b><span>National Minority Supplier Development Council — 51%+ ownership documentation.</span></div></div>
+          <div class="tier"><div class="tn">🏘️</div><div class="tt"><b>Local Black Chamber</b><span>Membership or certification from a regional Black chamber of commerce.</span></div></div>
+          <div class="tier"><div class="tn">📄</div><div class="tt"><b>Business documents</b><span>Entity registration + ownership attestation, reviewed manually.</span></div></div>
+        </div>
+        <div class="stack">
+          <button class="btn" onclick="showModal('m-verify')">Start verification</button>
+          <button class="btn ghost" onclick="go('s-dashboard')">Maybe later</button>
+        </div>
+        <div class="banner orchid">🔒 Zoemaelee never determines who is Black. It displays either your self-attestation or a third party's certification. No one is denied access for being unverified.</div>
+      </div>
+
+      <!-- SHARE -->
+      <div class="screen" id="s-share" data-tab="0">
+        <div class="topbar"><button class="back" onclick="go('s-dashboard')">←</button><h2>Share your list</h2></div>
+        <p>Anyone with this link can gift you — and still won't learn who you are.</p>
+        <div class="qrwrap"><div class="qr" id="qrGrid"></div></div>
+        <div class="linkbox" id="shareLink">zoemaelee.netlify.app/u/your-handle</div>
+        <div class="stack"><button class="btn" onclick="showModal('m-copied')">Copy link</button><button class="btn ghost" onclick="go('s-dashboard')">Done</button></div>
+        <div class="banner">🔒 No address, no real name, no payment. Your list is yours.</div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="screen" id="s-settings" data-tab="4">
+        <div class="topbar"><h2>Privacy &amp; settings</h2></div>
+        <div class="card">
+          <div class="toggle"><div class="lbl"><b>Unlisted list</b><span>Only reachable by link — never indexed or searchable.</span></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="toggle"><div class="lbl"><b>Hide display name</b><span>Show handle only, everywhere.</span></div><div class="sw" onclick="this.classList.toggle('on')"></div></div>
+          <div class="toggle"><div class="lbl"><b>Show Black-owned badge</b><span>Self-identified. Opt out anytime.</span></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="toggle"><div class="lbl"><b>Accept ally support</b><span>Let supporters gift, amplify, and track impact.</span></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+          <div class="toggle"><div class="lbl"><b>Appear on leaderboard</b><span>Off = anonymous, impact still counts.</span></div><div class="sw on" onclick="this.classList.toggle('on')"></div></div>
+        </div>
+        <div class="card" style="margin-top:14px;">
+          <div class="tier"><div class="tn">👤</div><div class="tt"><b id="setHandle">@you</b><span id="setEmail">—</span></div></div>
+        </div>
+        <button class="btn danger" style="margin-top:12px;" onclick="logOut()">Log out</button>
+        <div class="banner orchid" style="margin-top:14px;">🔒 Zoemaelee never stores your address and never touches payment. Your email stays private — only your handle is ever shown.</div>
+      </div>
+    </div>
+
+    <!-- MODALS -->
+    <div class="modal" id="m-bookmarklet"><div class="sheet"><div class="grab"></div><h2>Bookmarklet capture</h2><p>What happens when you click “Add to Zoemaelee” on a product page. It reads the page you're already on — you stay in control.</p><div class="prodpreview"><div class="ph">🎧</div><input id="bpTitle" class="bpinput" value="Studio Headphones — Pro" placeholder="Item name"><span>by AudioCo</span><input id="bpPrice" class="bpinput small" value="149.00" placeholder="Price" inputmode="decimal"></div><div class="banner">🔎 Extracted: title, price, image, link. Confirm to add.</div><div class="stack"><button class="btn" onclick="saveBookmarkletItem()">Confirm &amp; add to list</button><button class="btn ghost" onclick="hideModal()">Cancel</button></div></div></div>
+
+    <div class="modal" id="m-manual"><div class="sheet"><div class="grab"></div><h2>Enter details</h2><div class="field"><label>ITEM NAME</label><div class="inputwrap"><input id="miTitle" placeholder="Studio headphones"></div></div><div class="field"><label>PRICE</label><div class="inputwrap"><span class="pre">$</span><input id="miPrice" placeholder="149.00" inputmode="decimal"></div></div><div class="field"><label>LINK</label><div class="inputwrap"><input id="miUrl" placeholder="https://..."></div></div><div class="stack"><button class="btn" onclick="addItem()">Add item</button><button class="btn ghost" onclick="hideModal()">Cancel</button></div></div></div>
+
+    <div class="modal" id="m-added"><div class="sheet"><div class="grab"></div><div class="bigcheck">✓</div><h2 class="center">Added to your list</h2><p class="center">Your list is live. Share the link whenever you're ready.</p><button class="btn" onclick="hideModal();go('s-dashboard')">Back to my list</button></div></div>
+
+    <div class="modal" id="m-reserve"><div class="sheet"><div class="grab"></div><h2>Gift this item</h2><p>You'll be taken to the store to buy it. They'll see your gifter name — you choose it. The creator's address is never shown to you.</p><div class="field"><label>YOUR GIFTER NAME (OPTIONAL)</label><div class="inputwrap"><input placeholder="Leave blank to gift anonymously"></div></div><div class="field"><label>MESSAGE (OPTIONAL)</label><div class="inputwrap"><input placeholder="You're amazing!"></div></div><div class="banner orchid">🤝 You're supporting a Black creator. 10% of affiliate revenue goes to the Community Fund.</div><div class="stack"><button class="btn orchid" onclick="hideModal();showModal('m-reserved')">Continue to store</button><button class="btn ghost" onclick="hideModal()">Cancel</button></div></div></div>
+
+    <div class="modal" id="m-reserved"><div class="sheet"><div class="grab"></div><div class="bigcheck">🎁</div><h2 class="center">You're an ally</h2><p class="center">Item reserved. Your circle just got closer to its goal.</p><div class="impact"><div><b>4</b><span>Creators lifted</span></div><div><b>6</b><span>Gifts sent</span></div><div><b>8</b><span>Amplifies</span></div></div><div class="banner good">🔥 The Cookout is now 79/100 toward the monthly goal.</div><div class="stack"><button class="btn orchid" onclick="hideModal();go('s-circle')">View my circle</button></div></div></div>
+
+    <div class="modal" id="m-invite"><div class="sheet"><div class="grab"></div><h2>Invite to The Cookout</h2><p>Share this link or code. Anyone who joins adds their impact to the circle.</p><div class="linkbox">zoemaelee.netlify.app/cookout</div><div class="linkbox" style="color:var(--accent2);">CODE · ZOEMAELEE-7724</div><div class="stack"><button class="btn orchid" onclick="hideModal()">Copy invite</button><button class="btn ghost" onclick="hideModal()">Done</button></div></div></div>
+
+    <div class="modal" id="m-goal"><div class="sheet"><div class="grab"></div><h2>Edit shared goal</h2><p>Set a collective target. Everyone pulls toward it together.</p><div class="field"><label>GOAL</label><div class="inputwrap"><input placeholder="Lift 100 creators this month"></div></div><div class="field"><label>TARGET</label><div class="inputwrap"><input placeholder="100" inputmode="numeric"></div></div><div class="stack"><button class="btn orchid" onclick="hideModal()">Save goal</button><button class="btn ghost" onclick="hideModal()">Cancel</button></div></div></div>
+
+    <div class="modal" id="m-circlecreated"><div class="sheet"><div class="grab"></div><div class="bigcheck">🔥</div><h2 class="center">Circle created</h2><p class="center">The Cookout is live. Invite your people and set your shared goal.</p><button class="btn orchid" onclick="hideModal();go('s-circle')">View my circle</button></div></div>
+
+    <div class="modal" id="m-fund"><div class="sheet"><div class="grab"></div><h2>🌱 Community Fund</h2><p>10% of every affiliate dollar Zoemaelee earns is set aside and distributed monthly to Black-led nonprofits. Transparent and published.</p><div class="card" style="margin-top:6px;"><div class="tier"><div class="tn">📊</div><div class="tt"><b>Given so far</b><span>$4,210 across 6 organizations</span></div></div><div class="tier"><div class="tn">🗓️</div><div class="tt"><b>Distributed</b><span>Monthly, with a public report</span></div></div><div class="tier"><div class="tn">🏛️</div><div class="tt"><b>Recipients</b><span>HBCU funds, Black creator grants, community orgs</span></div></div></div><button class="btn" style="margin-top:14px;" onclick="hideModal()">Got it</button></div></div>
+
+    <div class="modal" id="m-verify"><div class="sheet"><div class="grab"></div><h2>Start verification</h2><p>Choose a certifier. Zoemaelee reviews the confirmation — we never evaluate race ourselves.</p><div class="stack" style="margin-top:6px;"><button class="btn ghost" onclick="hideModal()">Connect ByBlack certification</button><button class="btn ghost" onclick="hideModal()">Connect NMSDC / MBE</button><button class="btn ghost" onclick="hideModal()">Upload chamber letter</button><button class="btn ghost" onclick="hideModal()">Upload business documents</button></div><p class="tiny">Verification is free. Being unverified never removes features.</p></div></div>
+
+    <div class="modal" id="m-copied"><div class="sheet"><div class="grab"></div><h2>Link copied</h2><p>Paste it anywhere. Nobody learns who you are.</p><button class="btn" onclick="hideModal()">Got it</button></div></div>
+
+    <div class="modal" id="m-privacy"><div class="sheet"><div class="grab"></div><h2>Privacy Policy</h2><p><b>What we store.</b> Your email address and a securely hashed password so you can log in, your chosen handle, and the items you add to your list.</p><p><b>What we never store.</b> Your real name, your mailing address, and your payment details.</p><p><b>What is public.</b> Only your handle and the items on a list you choose to share. Your email is never shown to anyone.</p><p><b>Your control.</b> You can delete items, hide your list, or ask us to delete your account and all associated data at any time.</p><p><b>Contact.</b> privacy@zoemaelee.app</p><button class="btn" onclick="hideModal()">Got it</button></div></div>
+
+    <div class="modal" id="m-item"><div class="sheet"><div class="grab"></div><h2 id="itTitle">Item</h2><div class="drow"><span>Price</span><b id="itPrice">—</b></div><div class="drow"><span>Link</span><b id="itLink">—</b></div><div class="drow"><span>Added</span><b id="itWhen">—</b></div><div class="stack"><button class="btn" onclick="hideModal()">Close</button><button class="btn ghost" style="color:var(--danger);" onclick="deleteItem()">Remove from list</button></div></div></div>
+
+    <div class="tabbar" id="tabbar">
+      <button class="tab on" data-t="1" onclick="go('s-dashboard')"><span class="ic">📋</span>My list</button>
+      <button class="tab" data-t="0" onclick="go('s-additem')"><span class="ic">＋</span>Add</button>
+      <button class="tab" data-t="0" onclick="go('s-share')"><span class="ic">🔗</span>Share</button>
+      <button class="tab" data-t="3" onclick="go('s-ally')"><span class="ic">🤝</span>Ally</button>
+      <button class="tab" data-t="4" onclick="go('s-settings')"><span class="ic">⚙️</span>Privacy</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  /* ============================================================
+     CONFIG — these are PUBLIC values.
+     The publishable key is designed to be exposed in browser code;
+     your data is protected by Row Level Security, not by hiding it.
+     Never put the *secret* key (sb_secret_...) here.
+     ============================================================ */
+  const SUPABASE_URL = "https://gioxjlsgsjgwiqaeopxu.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_mJ4L-D9IuaD80j65hm64Kg_rx3Ped6O";
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+  let CURRENT_USER = null;
+
+  /* ---------- navigation ---------- */
+  function go(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    const el=document.getElementById(id); if(!el) return; el.classList.add('active'); el.scrollTop=0;
+    const tab=el.dataset.tab;
+    document.getElementById('tabbar').classList.toggle('hidden', tab==='0');
+    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on', t.dataset.t===tab && tab!=='0'));
+  }
+  function showModal(id){document.getElementById(id).classList.add('show');}
+  function hideModal(){document.querySelectorAll('.modal').forEach(m=>m.classList.remove('show'));}
+  document.querySelectorAll('.modal').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)hideModal();}));
+  function setHandle(){const v=(document.getElementById('handleInput').value||'').trim().toLowerCase().replace(/[^a-z0-9_]/g,'');if(v){document.getElementById('dashHandle').textContent='@'+v;document.getElementById('dashAv').textContent=v[0].toUpperCase();}}
+  function lbTab(which){
+    const a=document.getElementById('lb-allies'),c=document.getElementById('lb-circles');
+    const sa=document.getElementById('segAllies'),sc=document.getElementById('segCircles');
+    if(which==='allies'){a.style.display='block';c.style.display='none';sa.classList.add('on');sc.classList.remove('on');}
+    else{a.style.display='none';c.style.display='block';sc.classList.add('on');sa.classList.remove('on');}
+  }
+  function pickType(el){el.parentNode.querySelectorAll('.typetag').forEach(t=>t.classList.remove('on'));el.classList.add('on');}
+  function drawQR(){
+    const el=document.getElementById('qrGrid'); if(!el) return; const N=21; el.style.gridTemplateColumns='repeat('+N+',1fr)';
+    let seed=424242; const rnd=()=> (seed=(seed*1103515245+12345)&0x7fffffff)/0x7fffffff;
+    const finder=(r,c)=>(r<7&&c<7)||(r<7&&c>=N-7)||(r>=N-7&&c<7);
+    let html='';
+    for(let r=0;r<N;r++)for(let c=0;c<N;c++){let on=rnd()>.5;
+      if(finder(r,c)){const rr=r<7?r:r-(N-7),cc=c<7?c:c-(N-7);on=(rr===0||rr===6||cc===0||cc===6)||(rr>=2&&rr<=4&&cc>=2&&cc<=4);}
+      html+='<i style="background:'+(on?'#120C1C':'#fff')+'"></i>';}
+    el.innerHTML=html;
+  }
+
+  /* ---------- small helpers ---------- */
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+  function hostOf(u){try{return new URL(u).hostname.replace(/^www\./,'');}catch(e){return 'link';}}
+  function msg(id,text,kind){const el=document.getElementById(id);if(!el)return;el.textContent=text||'';el.className='authmsg'+(kind?' '+kind:'');}
+  function validEmail(e){return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e);}
+
+  /* ---------- auth ---------- */
+  async function createAccount(){
+    const handle=(document.getElementById('handleInput').value||'').trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
+    const email=(document.getElementById('suEmail').value||'').trim();
+    const pass=document.getElementById('suPass').value||'';
+    const consent=document.getElementById('suConsent').checked;
+    const btn=document.getElementById('suBtn');
+    if(handle.length<3) return msg('suMsg','Pick a handle with at least 3 characters (letters, numbers, underscore).','err');
+    if(!validEmail(email)) return msg('suMsg','Enter a valid email address.','err');
+    if(pass.length<8) return msg('suMsg','Password must be at least 8 characters.','err');
+    if(!consent) return msg('suMsg','Please accept the Privacy Policy to continue.','err');
+    btn.disabled=true; msg('suMsg','Creating your account…','ok');
+    try{
+      const {data:existing}=await sb.from('profiles').select('id').eq('handle',handle).maybeSingle();
+      if(existing){ btn.disabled=false; return msg('suMsg','That handle is taken — try another.','err'); }
+      const {data,error}=await sb.auth.signUp({email:email,password:pass,options:{data:{handle:handle}}});
+      if(error){ btn.disabled=false; return msg('suMsg',error.message,'err'); }
+      if(!data.session){
+        btn.disabled=false;
+        return msg('suMsg','Almost there — we sent a confirmation link to '+email+'. Click it, then log in.','ok');
+      }
+      await afterLogin(); btn.disabled=false; go('s-dashboard');
+    }catch(e){
+      btn.disabled=false; msg('suMsg','Something went wrong. Please try again.','err');
+    }
+  }
+
+  async function logIn(){
+    const email=(document.getElementById('liEmail').value||'').trim();
+    const pass=document.getElementById('liPass').value||'';
+    const btn=document.getElementById('liBtn');
+    if(!validEmail(email)) return msg('liMsg','Enter a valid email address.','err');
+    if(!pass) return msg('liMsg','Enter your password.','err');
+    btn.disabled=true; msg('liMsg','Logging in…','ok');
+    const {error}=await sb.auth.signInWithPassword({email:email,password:pass});
+    btn.disabled=false;
+    if(error) return msg('liMsg',error.message,'err');
+    await afterLogin();
+    go('s-dashboard');
+  }
+
+  async function logOut(){
+    await sb.auth.signOut();
+    CURRENT_USER=null;
+    go('s-welcome');
+  }
+
+  async function afterLogin(){
+    const {data}=await sb.auth.getSession();
+    CURRENT_USER=data.session?data.session.user:null;
+    if(!CURRENT_USER) return;
+    await loadProfile();
+    await loadItems();
+  }
+
+  async function loadProfile(){
+    if(!CURRENT_USER) return;
+    let handle=(CURRENT_USER.user_metadata&&CURRENT_USER.user_metadata.handle)||'you';
+    try{
+      const {data}=await sb.from('profiles').select('handle').eq('id',CURRENT_USER.id).maybeSingle();
+      if(data&&data.handle) handle=data.handle;
+    }catch(e){}
+    document.getElementById('dashHandle').textContent='@'+handle;
+    document.getElementById('dashAv').textContent=handle[0].toUpperCase();
+    const sl=document.getElementById('shareLink'); if(sl) sl.textContent='zoemaelee.netlify.app/u/'+handle;
+    const sh=document.getElementById('setHandle'); if(sh) sh.textContent='@'+handle;
+    const se=document.getElementById('setEmail'); if(se) se.textContent=CURRENT_USER.email||'—';
+  }
+
+  async function loadItems(){
+    const box=document.getElementById('dashItems'); if(!box||!CURRENT_USER) return;
+    const {data,error}=await sb.from('list_items').select('id,title,price,url').eq('user_id',CURRENT_USER.id).order('created_at',{ascending:false});
+    if(error){ box.innerHTML='<div class="item"><div class="mid"><b>Could not load your list</b><span>'+esc(error.message)+'</span></div></div>'; return; }
+    if(!data||!data.length){ box.innerHTML='<div class="item"><div class="mid"><b>No items yet</b><span>Add your first wish to get started</span></div></div>'; return; }
+    box.innerHTML=data.map(function(it){
+      const where=it.url?esc(hostOf(it.url)):'added manually';
+      const price=(it.price!=null&&it.price!=='')?('$'+esc(it.price)):'';
+      return '<div class="item itemrow" onclick="openItem(&#39;'+it.id+'&#39;)"><div class="thumb">🎁</div><div class="mid"><b>'+esc(it.title)+'</b><span>'+where+'</span></div><div class="price">'+price+'</div></div>';
+    }).join('');
+  }
+
+  async function addItem(){
+    if(!CURRENT_USER){ hideModal(); go('s-login'); return; }
+    const title=(document.getElementById('miTitle').value||'').trim();
+    const priceRaw=(document.getElementById('miPrice').value||'').trim();
+    const url=(document.getElementById('miUrl').value||'').trim()||null;
+    const price=priceRaw?parseFloat(priceRaw):null;
+    if(!title){ alert('Please enter an item name.'); return; }
+    const {error}=await sb.from('list_items').insert({user_id:CURRENT_USER.id,title:title,price:(isNaN(price)?null:price),url:url});
+    if(error){ alert('Could not save: '+error.message); return; }
+    document.getElementById('miTitle').value='';
+    document.getElementById('miPrice').value='';
+    document.getElementById('miUrl').value='';
+    hideModal(); showModal('m-added'); await loadItems();
+  }
+
+  /* ---------- add from the paste-link / bookmarklet preview ---------- */
+  async function saveBookmarkletItem(){
+    if(!CURRENT_USER){ hideModal(); go('s-login'); return; }
+    const title=(document.getElementById('bpTitle').value||'').trim();
+    const priceRaw=(document.getElementById('bpPrice').value||'').trim();
+    const price=priceRaw?parseFloat(priceRaw):null;
+    if(!title){ alert('Please enter an item name.'); return; }
+    const {error}=await sb.from('list_items').insert({
+      user_id:CURRENT_USER.id, title:title, price:(isNaN(price)?null:price), url:null
+    });
+    if(error){ alert('Could not save: '+error.message); return; }
+    document.getElementById('bpTitle').value='';
+    document.getElementById('bpPrice').value='';
+    hideModal(); showModal('m-added'); await loadItems();
+  }
+
+  /* ---------- item detail view ---------- */
+  let CURRENT_ITEM=null;
+  async function openItem(id){
+    if(!CURRENT_USER) return;
+    const {data,error}=await sb.from('list_items').select('id,title,price,url,created_at').eq('id',id).maybeSingle();
+    if(error||!data) return;
+    CURRENT_ITEM=data;
+    document.getElementById('itTitle').textContent=data.title;
+    document.getElementById('itPrice').textContent=(data.price!=null&&data.price!=='')?('$'+data.price):'Not set';
+    document.getElementById('itLink').textContent=data.url||'Added manually';
+    document.getElementById('itWhen').textContent=data.created_at?new Date(data.created_at).toLocaleDateString():'—';
+    showModal('m-item');
+  }
+  async function deleteItem(){
+    if(!CURRENT_ITEM) return;
+    const {error}=await sb.from('list_items').delete().eq('id',CURRENT_ITEM.id);
+    if(error){ alert('Could not delete: '+error.message); return; }
+    hideModal(); CURRENT_ITEM=null; await loadItems();
+  }
+
+  /* ---------- boot ---------- */
+  (async function(){
+    drawQR();
+    try{
+      const {data}=await sb.auth.getSession();
+      if(data.session){ CURRENT_USER=data.session.user; await afterLogin(); go('s-dashboard'); }
+    }catch(e){}
+    sb.auth.onAuthStateChange(function(_evt,session){ CURRENT_USER=session?session.user:null; });
+  })();
+</script>
+</body>
+</html>
