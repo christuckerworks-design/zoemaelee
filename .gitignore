@@ -1,0 +1,9 @@
+# Netlify CLI state — never commit this
+.netlify
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Dependencies (not used yet, but future-proof)
+node_modules
